@@ -8,6 +8,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,6 +50,21 @@ public class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody().getStatus()).isEqualTo(400);
         assertThat(response.getBody().getMessage()).contains("language");
+    }
+
+    @Test
+    public void handleConstraintViolationReturns400WithViolationDetail() {
+        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
+        when(violation.getMessage()).thenReturn("must be less than or equal to 100");
+
+        ConstraintViolationException ex = new ConstraintViolationException(
+                Collections.singleton(violation));
+
+        ResponseEntity<ErrorResponse> response = handler.handleConstraintViolation(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody().getStatus()).isEqualTo(400);
+        assertThat(response.getBody().getMessage()).contains("must be less than or equal to 100");
     }
 
     @Test

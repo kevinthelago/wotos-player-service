@@ -1,6 +1,7 @@
 package com.wotos.wotosplayerservice.exception;
 
 import feign.FeignException;
+import feign.RetryableException;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,8 @@ import static org.mockito.Mockito.when;
 
 /**
  * Pure unit tests for {@link GlobalExceptionHandler} — no Spring context or database required, so
- * each handler's status code and {@link ErrorResponse} body can be asserted in isolation.
+ * each handler's status code and {@link ErrorResponse} body can be asserted in isolation. Every
+ * response carries the {@code {"error":{"code","message","correlationId"}}} envelope.
  */
 public class GlobalExceptionHandlerTest {
 
@@ -31,9 +33,9 @@ public class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getStatus()).isEqualTo(404);
-        assertThat(response.getBody().getMessage()).isEqualTo("player 123 not found");
-        assertThat(response.getBody().getTimestamp()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(404);
+        assertThat(response.getBody().error().message()).isEqualTo("player 123 not found");
+        assertThat(response.getBody().error().correlationId()).isNotBlank();
     }
 
     @Test
@@ -48,8 +50,8 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleValidation(ex);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody().getStatus()).isEqualTo(400);
-        assertThat(response.getBody().getMessage()).contains("language");
+        assertThat(response.getBody().error().code()).isEqualTo(400);
+        assertThat(response.getBody().error().message()).contains("language");
     }
 
     @Test
@@ -63,8 +65,20 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleConstraintViolation(ex);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody().getStatus()).isEqualTo(400);
-        assertThat(response.getBody().getMessage()).contains("must be less than or equal to 100");
+        assertThat(response.getBody().error().code()).isEqualTo(400);
+        assertThat(response.getBody().error().message()).contains("must be less than or equal to 100");
+    }
+
+    @Test
+    public void handleTimeoutReturns504() {
+        RetryableException ex = mock(RetryableException.class);
+        when(ex.getMessage()).thenReturn("connect timed out executing GET");
+
+        ResponseEntity<ErrorResponse> response = handler.handleTimeout(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.GATEWAY_TIMEOUT);
+        assertThat(response.getBody().error().code()).isEqualTo(504);
+        assertThat(response.getBody().error().correlationId()).isNotBlank();
     }
 
     @Test
@@ -75,7 +89,7 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleFeign(ex);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
-        assertThat(response.getBody().getStatus()).isEqualTo(502);
+        assertThat(response.getBody().error().code()).isEqualTo(502);
     }
 
     @Test
@@ -83,7 +97,7 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponse> response = handler.handleGeneric(new RuntimeException("boom"));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody().getStatus()).isEqualTo(500);
-        assertThat(response.getBody().getMessage()).isEqualTo("An unexpected error occurred");
+        assertThat(response.getBody().error().code()).isEqualTo(500);
+        assertThat(response.getBody().error().message()).isEqualTo("An unexpected error occurred");
     }
 }

@@ -8,3 +8,5 @@
 
 - CONTRACT(backend-edge): NEW GET /api/players/{accountId}/achievements -> PlayerAchievementsResponse{accountId, achievements(WotPlayerAchievements), metadata(Map)}. Metadata cached 1d (achievement-meta). edge's commented-out achievements stub used @PathParam list-return -- update to this shape when wiring.
 
+- CONTRACT(backend-edge): player error body is now {error:{code,message,correlationId}} (was {status,message,timestamp}). Update edge error-handling/translation accordingly. 502=WoT error, 504=WoT timeout, 404=not found, 400=validation, 500=generic.
+

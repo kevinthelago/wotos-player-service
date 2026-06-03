@@ -99,8 +99,9 @@ public class PlayerControllerTest {
 
         mockMvc.perform(get("/api/players").param("accountIds", "1"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("player 1 not found"));
+                .andExpect(jsonPath("$.error.code").value(404))
+                .andExpect(jsonPath("$.error.message").value("player 1 not found"))
+                .andExpect(jsonPath("$.error.correlationId").isNotEmpty());
     }
 
     @Test
@@ -110,6 +111,6 @@ public class PlayerControllerTest {
 
         mockMvc.perform(post("/api/players").param("accountIds", "1"))
                 .andExpect(status().isBadGateway())
-                .andExpect(jsonPath("$.status").value(502));
+                .andExpect(jsonPath("$.error.code").value(502));
     }
 }

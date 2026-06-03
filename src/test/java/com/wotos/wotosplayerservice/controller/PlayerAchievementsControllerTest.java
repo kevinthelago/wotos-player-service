@@ -1,7 +1,9 @@
 package com.wotos.wotosplayerservice.controller;
 
+import com.wotos.wotosplayerservice.exception.EntityNotFoundException;
 import com.wotos.wotosplayerservice.exception.GlobalExceptionHandler;
 import com.wotos.wotosplayerservice.service.PlayerAchievementsService;
+import com.wotos.wotosplayerservice.util.model.PlayerAchievementsResponse;
 import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,11 +46,29 @@ public class PlayerAchievementsControllerTest {
     }
 
     @Test
+    public void getPlayerAchievementsReturns200() throws Exception {
+        when(playerAchievementsService.getPlayerAchievements(any()))
+                .thenReturn(new PlayerAchievementsResponse(1, null, new HashMap<>()));
+
+        mockMvc.perform(get("/api/players/1/achievements"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getPlayerAchievementsForUnknownAccountReturns404() throws Exception {
+        when(playerAchievementsService.getPlayerAchievements(any()))
+                .thenThrow(new EntityNotFoundException("No achievements found for account 1"));
+
+        mockMvc.perform(get("/api/players/1/achievements"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void getPlayerAchievementsByAccountIdsReturns200() throws Exception {
         when(playerAchievementsService.getPlayerAchievementsSnapshotsByAccountIds(any()))
                 .thenReturn(new HashMap<>());
 
-        mockMvc.perform(get("/api/player/achievements").param("accountIds", "1"))
+        mockMvc.perform(get("/api/players/achievements").param("accountIds", "1"))
                 .andExpect(status().isOk());
     }
 
@@ -57,7 +77,7 @@ public class PlayerAchievementsControllerTest {
         when(playerAchievementsService.createPlayerAchievementsSnapshotsByAccountIds(any()))
                 .thenReturn(new HashMap<>());
 
-        mockMvc.perform(post("/api/player/achievements").param("accountIds", "1"))
+        mockMvc.perform(post("/api/players/achievements").param("accountIds", "1"))
                 .andExpect(status().isOk());
     }
 
@@ -67,7 +87,7 @@ public class PlayerAchievementsControllerTest {
         when(playerAchievementsService.createPlayerAchievementsSnapshotsByAccountIds(any()))
                 .thenThrow(feignEx);
 
-        mockMvc.perform(post("/api/player/achievements").param("accountIds", "1"))
+        mockMvc.perform(post("/api/players/achievements").param("accountIds", "1"))
                 .andExpect(status().isBadGateway());
     }
 }

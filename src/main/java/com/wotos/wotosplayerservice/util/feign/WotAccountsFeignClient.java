@@ -2,7 +2,7 @@ package com.wotos.wotosplayerservice.util.feign;
 
 import com.wotos.wotosplayerservice.config.FeignConfig;
 import com.wotos.wotosplayerservice.util.model.wot.WotApiResponse;
-import com.wotos.wotosplayerservice.util.model.wot.achievements.WotAchievements;
+import com.wotos.wotosplayerservice.util.model.wot.achievements.WotPlayerAchievements;
 import com.wotos.wotosplayerservice.util.model.wot.player.WotPlayer;
 import com.wotos.wotosplayerservice.util.model.wot.player.WotPlayerDetails;
 import com.wotos.wotosplayerservice.util.model.wot.player.WotPlayerVehicle;
@@ -50,9 +50,20 @@ public interface WotAccountsFeignClient {
     );
 
     @GetMapping(value = "/account/achievements/")
-    ResponseEntity<WotApiResponse<WotAchievements>> getPlayerAchievements(
+    ResponseEntity<WotApiResponse<Map<Integer, WotPlayerAchievements>>> getPlayerAchievements(
             @RequestParam(value = "application_id") String appId,
             @RequestParam(value = "account_id") Integer[] accountIds,
+            @RequestParam(value = "fields", required = false) String[] fields,
+            @RequestParam(value = "language", required = false, defaultValue = "en") @Language String language
+    );
+
+    /**
+     * Fetches the WoT achievement encyclopedia (achievement definitions/metadata). This data is
+     * effectively static and is cached for a day by {@code AchievementMetadataService}.
+     */
+    @GetMapping(value = "/encyclopedia/achievements/")
+    ResponseEntity<WotApiResponse<Map<String, Object>>> getAchievementsMetadata(
+            @RequestParam(value = "application_id") String appId,
             @RequestParam(value = "fields", required = false) String[] fields,
             @RequestParam(value = "language", required = false, defaultValue = "en") @Language String language
     );

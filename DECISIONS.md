@@ -6,3 +6,5 @@
 
 - OBSERVED: edge WotosVehicleFeignClient targets name=wotos-player-service for /api/vehicles -- likely should be wotos-vehicle-service. edge's bug, not acting.
 
+- CONTRACT(backend-edge): NEW GET /api/players/{accountId}/achievements -> PlayerAchievementsResponse{accountId, achievements(WotPlayerAchievements), metadata(Map)}. Metadata cached 1d (achievement-meta). edge's commented-out achievements stub used @PathParam list-return -- update to this shape when wiring.
+

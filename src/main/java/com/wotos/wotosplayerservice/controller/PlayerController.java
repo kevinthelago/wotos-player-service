@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.Max;
+import jakarta.validation.constraints.Max;
 import java.util.List;
 import java.util.Map;
 
@@ -102,7 +102,7 @@ public class PlayerController {
      * @param limit      optional cap on results, up to 100
      * @param searchType the WoT search mode (e.g. {@code exact}, {@code startswith})
      * @return matching {@link WotPlayer} records as returned by the WoT API
-     * @throws javax.validation.ConstraintViolationException if a parameter fails validation
+     * @throws jakarta.validation.ConstraintViolationException if a parameter fails validation
      * @throws feign.FeignException if the upstream WoT API call fails
      */
     @GetMapping("/list")

@@ -1,32 +1,34 @@
 spring:
+  config:
+    # Spring Cloud Config (2020.0+) requires an explicit import; make it optional so
+    # tests boot without a running config server.
+    import: "optional:configserver:"
   cloud:
-    discovery:
-      enabled: false
     config:
       enabled: false
-      discovery:
-        enabled: false
+    discovery:
+      enabled: false
   jpa:
     show-sql: true
     generate-ddl: true
     hibernate:
       ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
   datasource:
-    url: jdbc:mysql://localhost:3306/wotos_statistics_test?useSSL=false
+    url: "jdbc:mysql://localhost:3306/wotos_players_test_database?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-javax:
-  persistence:
-    schema-generation:
-      scripts:
-        action: create
+eureka:
+  client:
+    enabled: false
 
 env:
   app_id: ""
-  snapshot_rate: 10
+  snapshot_rate: 0
   urls:
-    world_of_tanks_api: "https://api.worldoftanks.com/wot"
-    xvm_expected_statistics: "https://static.modxvm.com/wn8-data-exp/json/wn8exp.json"
-
+    world_of_tanks_api: "http://localhost"
+    xvm_expected_statistics: "http://localhost"

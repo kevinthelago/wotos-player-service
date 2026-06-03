@@ -16,7 +16,7 @@ import java.util.Map;
  * of player accounts.
  */
 @RestController
-@RequestMapping("/api/player")
+@RequestMapping("/api/players")
 public class PlayerSnapshotController {
 
     private final PlayerSnapshotService playerSnapshotService;
@@ -26,16 +26,22 @@ public class PlayerSnapshotController {
     }
 
     /**
-     * Returns the stored snapshot history for each account.
+     * Returns the stored snapshot history for each account as a time series, oldest first.
+     * When both {@code from} and {@code to} are supplied the series is restricted to that
+     * inclusive epoch-second window.
      *
      * @param accountIds the account ids to look up
-     * @return a map of account id to the ordered list of {@link PlayerSnapshot}
+     * @param from       optional inclusive lower bound (epoch seconds)
+     * @param to         optional inclusive upper bound (epoch seconds)
+     * @return a map of account id to the chronologically ordered list of {@link PlayerSnapshot}
      */
     @GetMapping("/snapshots")
     public Map<Integer, List<PlayerSnapshot>> getPlayerSnapshotsByAccountIds(
-            @RequestParam("accountIds") Integer[] accountIds
+            @RequestParam("accountIds") Integer[] accountIds,
+            @RequestParam(value = "from", required = false) Long from,
+            @RequestParam(value = "to", required = false) Long to
     ) {
-        return playerSnapshotService.getPlayerSnapshotsByAccountIds(accountIds);
+        return playerSnapshotService.getPlayerSnapshotsByAccountIds(accountIds, from, to);
     }
 
     /**

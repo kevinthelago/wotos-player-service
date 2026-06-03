@@ -45,9 +45,10 @@ public class PlayerSnapshotControllerTest {
 
     @Test
     public void getPlayerSnapshotsByAccountIdsReturns200() throws Exception {
-        when(playerSnapshotService.getPlayerSnapshotsByAccountIds(any())).thenReturn(new HashMap<>());
+        when(playerSnapshotService.getPlayerSnapshotsByAccountIds(any(), any(), any()))
+                .thenReturn(new HashMap<>());
 
-        mockMvc.perform(get("/api/player/snapshots").param("accountIds", "1"))
+        mockMvc.perform(get("/api/players/snapshots").param("accountIds", "1"))
                 .andExpect(status().isOk());
     }
 
@@ -55,7 +56,7 @@ public class PlayerSnapshotControllerTest {
     public void createPlayerSnapshotsByAccountIdsReturns200() throws Exception {
         when(playerSnapshotService.createPlayerSnapshotByAccountIds(any())).thenReturn(new HashMap<>());
 
-        mockMvc.perform(post("/api/player/snapshots").param("accountIds", "1"))
+        mockMvc.perform(post("/api/players/snapshots").param("accountIds", "1"))
                 .andExpect(status().isOk());
     }
 
@@ -64,7 +65,7 @@ public class PlayerSnapshotControllerTest {
         FeignException feignEx = mock(FeignException.class);
         when(playerSnapshotService.createPlayerSnapshotByAccountIds(any())).thenThrow(feignEx);
 
-        mockMvc.perform(post("/api/player/snapshots").param("accountIds", "1"))
+        mockMvc.perform(post("/api/players/snapshots").param("accountIds", "1"))
                 .andExpect(status().isBadGateway());
     }
 }

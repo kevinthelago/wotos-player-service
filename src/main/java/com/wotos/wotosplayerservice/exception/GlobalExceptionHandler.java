@@ -5,6 +5,7 @@ import feign.RetryableException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -99,7 +100,12 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String message, Exception ex) {
         String correlationId = UUID.randomUUID().toString();
-        log.error("[{}] {} -> {} {}", correlationId, ex.getClass().getSimpleName(), status.value(), message, ex);
+        MDC.put("correlationId", correlationId);
+        try {
+            log.error("{} -> {} {}", ex.getClass().getSimpleName(), status.value(), message, ex);
+        } finally {
+            MDC.remove("correlationId");
+        }
         return ResponseEntity.status(status).body(ErrorResponse.of(status.value(), message, correlationId));
     }
 }

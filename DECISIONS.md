@@ -10,3 +10,5 @@
 
 - CONTRACT(backend-edge): player error body is now {error:{code,message,correlationId}} (was {status,message,timestamp}). Update edge error-handling/translation accordingly. 502=WoT error, 504=WoT timeout, 404=not found, 400=validation, 500=generic.
 
+- NOTE: kickoff referenced wotos-config/_shared/logback-spring.xml which does not exist in wotos-config; authored a structured-JSON logback-spring.xml (logstash-logback-encoder) in player instead. Same intent (structured logs + correlationId via MDC).
+

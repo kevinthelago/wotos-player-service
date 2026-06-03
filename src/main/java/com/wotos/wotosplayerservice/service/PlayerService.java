@@ -154,11 +154,9 @@ public class PlayerService {
     }
 
     private List<WotPlayer> fetchPlayersByNickname(String[] nicknames, String language, Integer limit, String searchType) {
-        List<WotPlayer> wotPlayers = wotAccountsFeignClient.getPlayersByExactNickname(
+        return wotAccountsFeignClient.getPlayersByExactNickname(
                 APP_ID, nicknames, language, limit, searchType
         ).getBody().getData();
-
-        return null;
     }
 
 }

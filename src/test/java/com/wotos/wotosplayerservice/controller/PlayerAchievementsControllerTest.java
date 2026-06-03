@@ -5,14 +5,12 @@ import com.wotos.wotosplayerservice.exception.GlobalExceptionHandler;
 import com.wotos.wotosplayerservice.service.PlayerAchievementsService;
 import com.wotos.wotosplayerservice.util.model.PlayerAchievementsResponse;
 import feign.FeignException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashMap;
 
@@ -24,29 +22,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvc tests covering {@link PlayerAchievementsController}'s endpoint routes and the
- * integration with {@link GlobalExceptionHandler}.
+ * {@link WebMvcTest} slice for {@link PlayerAchievementsController}: endpoint routes and
+ * {@link GlobalExceptionHandler} integration with the service mocked.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class PlayerAchievementsControllerTest {
+@WebMvcTest(PlayerAchievementsController.class)
+@Import(GlobalExceptionHandler.class)
+class PlayerAchievementsControllerTest {
 
-    @Mock
-    private PlayerAchievementsService playerAchievementsService;
-
-    @InjectMocks
-    private PlayerAchievementsController playerAchievementsController;
-
+    @Autowired
     private MockMvc mockMvc;
 
-    @Before
-    public void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(playerAchievementsController)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-    }
+    @MockBean
+    private PlayerAchievementsService playerAchievementsService;
 
     @Test
-    public void getPlayerAchievementsReturns200() throws Exception {
+    void getPlayerAchievementsReturns200() throws Exception {
         when(playerAchievementsService.getPlayerAchievements(any()))
                 .thenReturn(new PlayerAchievementsResponse(1, null, new HashMap<>()));
 
@@ -55,7 +45,7 @@ public class PlayerAchievementsControllerTest {
     }
 
     @Test
-    public void getPlayerAchievementsForUnknownAccountReturns404() throws Exception {
+    void getPlayerAchievementsForUnknownAccountReturns404() throws Exception {
         when(playerAchievementsService.getPlayerAchievements(any()))
                 .thenThrow(new EntityNotFoundException("No achievements found for account 1"));
 
@@ -64,7 +54,7 @@ public class PlayerAchievementsControllerTest {
     }
 
     @Test
-    public void getPlayerAchievementsByAccountIdsReturns200() throws Exception {
+    void getPlayerAchievementsByAccountIdsReturns200() throws Exception {
         when(playerAchievementsService.getPlayerAchievementsSnapshotsByAccountIds(any()))
                 .thenReturn(new HashMap<>());
 
@@ -73,7 +63,7 @@ public class PlayerAchievementsControllerTest {
     }
 
     @Test
-    public void createPlayerAchievementsByAccountIdsReturns200() throws Exception {
+    void createPlayerAchievementsByAccountIdsReturns200() throws Exception {
         when(playerAchievementsService.createPlayerAchievementsSnapshotsByAccountIds(any()))
                 .thenReturn(new HashMap<>());
 
@@ -82,7 +72,7 @@ public class PlayerAchievementsControllerTest {
     }
 
     @Test
-    public void feignExceptionFromServiceMapsTo502() throws Exception {
+    void feignExceptionFromServiceMapsTo502() throws Exception {
         FeignException feignEx = mock(FeignException.class);
         when(playerAchievementsService.createPlayerAchievementsSnapshotsByAccountIds(any()))
                 .thenThrow(feignEx);

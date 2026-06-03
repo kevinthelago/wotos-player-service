@@ -3,14 +3,12 @@ package com.wotos.wotosplayerservice.controller;
 import com.wotos.wotosplayerservice.exception.GlobalExceptionHandler;
 import com.wotos.wotosplayerservice.service.PlayerSnapshotService;
 import feign.FeignException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashMap;
 
@@ -22,29 +20,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvc tests covering {@link PlayerSnapshotController}'s endpoint routes and the
- * integration with {@link GlobalExceptionHandler}.
+ * {@link WebMvcTest} slice for {@link PlayerSnapshotController}: endpoint routes and
+ * {@link GlobalExceptionHandler} integration with the service mocked.
  */
-@RunWith(MockitoJUnitRunner.class)
-public class PlayerSnapshotControllerTest {
+@WebMvcTest(PlayerSnapshotController.class)
+@Import(GlobalExceptionHandler.class)
+class PlayerSnapshotControllerTest {
 
-    @Mock
-    private PlayerSnapshotService playerSnapshotService;
-
-    @InjectMocks
-    private PlayerSnapshotController playerSnapshotController;
-
+    @Autowired
     private MockMvc mockMvc;
 
-    @Before
-    public void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(playerSnapshotController)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-    }
+    @MockBean
+    private PlayerSnapshotService playerSnapshotService;
 
     @Test
-    public void getPlayerSnapshotsByAccountIdsReturns200() throws Exception {
+    void getPlayerSnapshotsByAccountIdsReturns200() throws Exception {
         when(playerSnapshotService.getPlayerSnapshotsByAccountIds(any(), any(), any()))
                 .thenReturn(new HashMap<>());
 
@@ -53,7 +43,7 @@ public class PlayerSnapshotControllerTest {
     }
 
     @Test
-    public void createPlayerSnapshotsByAccountIdsReturns200() throws Exception {
+    void createPlayerSnapshotsByAccountIdsReturns200() throws Exception {
         when(playerSnapshotService.createPlayerSnapshotByAccountIds(any())).thenReturn(new HashMap<>());
 
         mockMvc.perform(post("/api/players/snapshots").param("accountIds", "1"))
@@ -61,7 +51,7 @@ public class PlayerSnapshotControllerTest {
     }
 
     @Test
-    public void feignExceptionFromServiceMapsTo502() throws Exception {
+    void feignExceptionFromServiceMapsTo502() throws Exception {
         FeignException feignEx = mock(FeignException.class);
         when(playerSnapshotService.createPlayerSnapshotByAccountIds(any())).thenThrow(feignEx);
 
